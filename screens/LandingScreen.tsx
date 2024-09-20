@@ -1,8 +1,16 @@
 import LottieView from "lottie-react-native";
-import React from "react";
+import React, { useState } from "react";
 import { Text, StyleSheet, SafeAreaView, Pressable, View } from "react-native";
+import AuthOptionsModal from "../components/UI/AuthOptionsModal";
 
 const LandingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+
+  const openModal = (mode: "login" | "register") => {
+    setAuthMode(mode);
+    setModalVisible(true);
+  };
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.appTitle}>Vita Track</Text>
@@ -15,19 +23,19 @@ const LandingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         style={{ width: "100%", height: 400 }}
       />
       <View style={styles.btnContainer}>
-        <Pressable
-          style={styles.btns}
-          onPress={() => navigation.navigate("Login")}
-        >
+        <Pressable style={styles.btns} onPress={() => openModal("login")}>
           <Text style={styles.btnTxt}>Log In</Text>
         </Pressable>
-        <Pressable
-          style={styles.btns}
-          onPress={() => navigation.navigate("Register")}
-        >
+        <Pressable style={styles.btns} onPress={() => openModal("register")}>
           <Text style={styles.btnTxt}>Register</Text>
         </Pressable>
       </View>
+      <AuthOptionsModal
+        visible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        navigation={navigation}
+        authMode={authMode}
+      />
     </SafeAreaView>
   );
 };
