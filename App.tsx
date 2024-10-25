@@ -4,6 +4,9 @@ import LandingScreen from "./screens/LandingScreen";
 import DoctorRegistration from "./screens/Registeration/DoctorRegisteration";
 import { DefaultTheme } from "react-native-paper";
 import { Provider as PaperProvider } from "react-native-paper";
+import { Provider as ReduxProvider } from "react-redux";
+import store from "./store";
+import DoctorDashboard from "./screens/DoctorDashboard/DoctorDashboard";
 
 const Stack = createStackNavigator();
 const theme = {
@@ -22,29 +25,39 @@ const theme = {
 };
 export default function App() {
   return (
-    <PaperProvider theme={theme}>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Landing"
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: "#008080",
-            },
-            headerTintColor: "#fff",
-          }}
-        >
-          <Stack.Screen
-            name="Landing"
-            component={LandingScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Doctor Registration"
-            component={DoctorRegistration}
-            options={{ headerBackAccessibilityLabel: "Back" }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </PaperProvider>
+    <ReduxProvider store={store}>
+      <PaperProvider theme={theme}>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="Landing"
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: "#008080",
+              },
+              headerTintColor: "#fff",
+            }}
+          >
+            <Stack.Screen
+              name="Landing"
+              component={LandingScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Doctor Registration"
+              component={DoctorRegistration}
+              options={{ headerBackAccessibilityLabel: "Back" }}
+            />
+            <Stack.Screen
+              name="Doctor Dashboard"
+              component={DoctorDashboard}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                headerShown: false,
+              }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PaperProvider>
+    </ReduxProvider>
   );
 }

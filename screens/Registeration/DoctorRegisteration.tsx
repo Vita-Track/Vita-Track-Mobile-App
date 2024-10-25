@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { TextInput, Button, ProgressBar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const DoctorRegistration: React.FC = () => {
+const DoctorRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({
@@ -25,6 +25,11 @@ const DoctorRegistration: React.FC = () => {
       ...prevData,
       [name]: value,
     }));
+  };
+
+  const handleSubmit = () => {
+    console.log(formData);
+    navigation.navigate("Doctor Dashboard");
   };
 
   const nextStep = () => setStep((prev) => prev + 1);
@@ -175,11 +180,7 @@ const DoctorRegistration: React.FC = () => {
             Next
           </Button>
         ) : (
-          <Button
-            mode="contained"
-            onPress={() => alert("Form Submitted")}
-            style={styles.button}
-          >
+          <Button mode="contained" onPress={handleSubmit} style={styles.button}>
             Submit
           </Button>
         )}
