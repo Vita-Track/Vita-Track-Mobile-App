@@ -2,7 +2,8 @@ import { SafeAreaView, View, StyleSheet, Text } from "react-native";
 import { Button, Icon } from "react-native-paper";
 
 interface IAppointmentBarProps {
-  patientName: string;
+  patientName?: string;
+  doctorName?: string;
   time: string;
   date: string;
   showDate?: boolean;
@@ -10,7 +11,12 @@ interface IAppointmentBarProps {
 const AppointmentBar: React.FC<IAppointmentBarProps> = (props) => {
   return (
     <SafeAreaView style={styles.appointmentBar}>
-      <Text style={styles.patientName}>{props.patientName}</Text>
+      {props.doctorName && (
+        <Text style={styles.patientName}>Dr. {props.doctorName}</Text>
+      )}
+      {props.patientName && (
+        <Text style={styles.patientName}>{props.patientName}</Text>
+      )}
       <Text style={styles.time}>{props.time}</Text>
       {props.showDate && <Text style={styles.date}>{props.date}</Text>}
     </SafeAreaView>

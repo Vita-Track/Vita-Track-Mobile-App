@@ -79,7 +79,15 @@ const AuthOptionsModal: React.FC<AuthOptionsModalProps> = ({
 
           <Pressable
             style={styles.btn}
-            onPress={() => navigation.navigate(authMode, { role: "patient" })}
+            onPress={() => {
+              if (authMode === "login") {
+                navigation.navigate("Login");
+                onClose();
+              } else {
+                navigation.navigate("Patient Registration");
+                onClose();
+              }
+            }}
           >
             <Text style={styles.btnTxt}>
               {authMode === "login" ? "Log in" : "Register"} as Patient

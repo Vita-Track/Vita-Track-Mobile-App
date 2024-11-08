@@ -3,13 +3,13 @@ import SnackBar, { SnackBarContents } from "../../components/UI/SnackBar";
 import { Link } from "@react-navigation/native";
 import useHelper from "../../hooks/useHelper";
 import { DummyAppointments, DummyDoctors, DummyPatients } from "../../data";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AppointmentBar from "../../components/UI/AppointmentBar";
 import { Button } from "react-native-paper";
 import QuickAction, {
   IQuickActionProps,
 } from "../../components/UI/QuickAction";
-const DoctorDashboard = () => {
+const DoctorDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [dayPreviewAppointments, setDayPreviewAppointments] = useState<any[]>(
     []
   );
@@ -44,7 +44,7 @@ const DoctorDashboard = () => {
     {
       icon: "clipboard",
       label: "Manage Patients",
-      onPress: () => console.log("View Patient Records"),
+      onPress: () => navigation.navigate("patients-list-screen"),
     },
     {
       icon: "chat",
@@ -100,7 +100,9 @@ const DoctorDashboard = () => {
               );
             })}
             <Button style={styles.ddashboardBtn} mode="contained">
-              <Link to="/Appointments">View all of today's appointments</Link>
+              <Link to="/appointments-screen">
+                View all of today's appointments
+              </Link>
             </Button>
           </View>
           <Text style={styles.mainContentHeading}>Quick Actions</Text>
@@ -126,7 +128,7 @@ const DoctorDashboard = () => {
 const styles = StyleSheet.create({
   doctorContainer: {
     flex: 1,
-    backgroundColor: "#B2D8D8",
+    backgroundColor: "#f0f4f7",
     padding: 10,
     position: "relative",
   },

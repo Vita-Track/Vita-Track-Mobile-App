@@ -6,7 +6,15 @@ import { DefaultTheme } from "react-native-paper";
 import { Provider as PaperProvider } from "react-native-paper";
 import { Provider as ReduxProvider } from "react-redux";
 import store from "./store";
-import DoctorDashboard from "./screens/DoctorDashboard/DoctorDashboard";
+import DoctorDashboard from "./screens/Dashboard/DoctorDashboard";
+import AppointmentsScreen from "./screens/AppointmentsScreen/AppointmentsScreen";
+import { useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import PatientListScreen from "./screens/PatientsListScreen.tsx/PatientsListScreen";
+import PatientRegisteration from "./screens/Registeration/PatientRegisteration";
+import PatientDashboard from "./screens/Dashboard/PatientDashboard";
+import ExploreDoctorsScreen from "./screens/ExploreDoctorsScreen/ExploreDoctorsScreen";
+import DoctorDetails from "./screens/DoctorDetails/DoctorDetails";
 
 const Stack = createStackNavigator();
 const theme = {
@@ -24,6 +32,19 @@ const theme = {
   },
 };
 export default function App() {
+  useEffect(() => {
+    const setTestDoctorId = async () => {
+      try {
+        await AsyncStorage.setItem("doctorId", "1");
+        await AsyncStorage.setItem("patientId", "1");
+        console.log("Doctor ID set to 1 for testing.");
+      } catch (error) {
+        console.error("Error setting doctor ID:", error);
+      }
+    };
+
+    setTestDoctorId();
+  }, []);
   return (
     <ReduxProvider store={store}>
       <PaperProvider theme={theme}>
@@ -48,11 +69,61 @@ export default function App() {
               options={{ headerBackAccessibilityLabel: "Back" }}
             />
             <Stack.Screen
+              name="Patient Registration"
+              component={PatientRegisteration}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Patient Registration",
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
               name="Doctor Dashboard"
               component={DoctorDashboard}
               options={{
                 headerBackAccessibilityLabel: "Back",
                 headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="Patient Dashboard"
+              component={PatientDashboard}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="explore-doctors-screen"
+              component={ExploreDoctorsScreen}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Explore Doctors",
+              }}
+            />
+            <Stack.Screen
+              name="doctor-details"
+              component={DoctorDetails}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Doctor Details",
+              }}
+            />
+
+            <Stack.Screen
+              name="appointments-screen"
+              component={AppointmentsScreen}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Appointments",
+              }}
+            />
+            <Stack.Screen
+              name="patients-list-screen"
+              component={PatientListScreen}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Patients",
               }}
             />
           </Stack.Navigator>

@@ -49,14 +49,46 @@ const useHelper = () => {
     return appointmentsTodayForDoctorPreview;
   };
 
+  const getAppointmentsByDate = (appointments: Appointment[], date: Date) => {
+    const formattedDate = date.toISOString().split("T")[0];
+    return appointments.filter((appointment) => {
+      const appointmentDate = new Date(appointment.date)
+        .toISOString()
+        .split("T")[0];
+      return appointmentDate === formattedDate;
+    });
+  };
   const findPatientFromId = (patients: Patient[], patientId: string) => {
     return patients.find((patient) => patient.id === patientId);
   };
+  const findDoctorFromId = (doctors: Doctor[], doctorId: string) => {
+    return doctors.find((doctor) => doctor.id === doctorId);
+  };
 
+  const getAppointmentsByPatientId = (
+    appointments: Appointment[],
+    patientId: string
+  ) => {
+    return appointments.filter(
+      (appointment) => appointment.patientId === patientId
+    );
+  };
+
+  const getDoctorsByPatientId = (doctors: Doctor[], patientId: string) => {
+    return doctors.filter((doctor) => {
+      return doctor.associatedPatients?.find(
+        (patient) => patient.id === patientId
+      );
+    });
+  };
   return {
     doctorsDayAppointmentsPreview,
     getFutureAppointments,
+    getAppointmentsByDate,
     findPatientFromId,
+    findDoctorFromId,
+    getAppointmentsByPatientId,
+    getDoctorsByPatientId,
   };
 };
 
