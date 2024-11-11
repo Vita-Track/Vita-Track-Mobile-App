@@ -64,7 +64,7 @@ const AuthOptionsModal: React.FC<AuthOptionsModalProps> = ({
             style={styles.btn}
             onPress={() => {
               if (authMode === "login") {
-                navigation.navigate("Login");
+                navigation.navigate("doctor-login");
                 onClose();
               } else {
                 navigation.navigate("Doctor Registration");
@@ -81,7 +81,7 @@ const AuthOptionsModal: React.FC<AuthOptionsModalProps> = ({
             style={styles.btn}
             onPress={() => {
               if (authMode === "login") {
-                navigation.navigate("Login");
+                navigation.navigate("patient-login");
                 onClose();
               } else {
                 navigation.navigate("Patient Registration");

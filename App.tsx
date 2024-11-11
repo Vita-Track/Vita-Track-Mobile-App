@@ -15,6 +15,8 @@ import PatientRegisteration from "./screens/Registeration/PatientRegisteration";
 import PatientDashboard from "./screens/Dashboard/PatientDashboard";
 import ExploreDoctorsScreen from "./screens/ExploreDoctorsScreen/ExploreDoctorsScreen";
 import DoctorDetails from "./screens/DoctorDetails/DoctorDetails";
+import DoctorLogin from "./screens/Login/DoctorLogin";
+import PatientLogin from "./screens/Login/PatientLogin";
 
 const Stack = createStackNavigator();
 const theme = {
@@ -74,6 +76,24 @@ export default function App() {
               options={{
                 headerBackAccessibilityLabel: "Back",
                 title: "Patient Registration",
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="doctor-login"
+              component={DoctorLogin}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Doctor Login",
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="patient-login"
+              component={PatientLogin}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Patient Login",
                 headerShown: false,
               }}
             />

@@ -29,7 +29,7 @@ const ExploreDoctorsScreen: React.FC<{ navigation: any }> = ({
       />
       <FlatList
         data={filteredDoctors}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id || item.firstName}
         renderItem={({ item }) => (
           <DoctorCard
             name={`${item.firstName} ${item.lastName}`}
