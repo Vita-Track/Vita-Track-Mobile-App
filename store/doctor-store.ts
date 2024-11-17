@@ -6,7 +6,7 @@ const initialState: Doctor = {
   gender: "",
   dateOfBirth: "",
   email: "",
-  phoneNumber: "",
+  phone: "",
   specialization: "",
   qualification: "",
   experienceYears: "",
@@ -23,7 +23,7 @@ const doctorSlice = createSlice({
       state.gender = action.payload.gender;
       state.dateOfBirth = action.payload.dateOfBirth;
       state.email = action.payload.email;
-      state.phoneNumber = action.payload.phoneNumber;
+      state.phone = action.payload.phone;
       state.specialization = action.payload.specialization;
       state.qualification = action.payload.qualification;
       state.experienceYears = action.payload.experienceYears;

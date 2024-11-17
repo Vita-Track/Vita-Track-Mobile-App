@@ -1,17 +1,33 @@
-import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from "react-native";
 import { Button } from "react-native-paper";
 import RNPickerSelect from "react-native-picker-select";
-import { DummyDoctors } from "../../data";
+import { useSelector } from "react-redux";
+import { addAppointment } from "../../firebase/database";
+import useHelper from "../../hooks/useHelper";
+import useApi from "../../hooks/useApi";
 
 const DoctorDetails: React.FC<{ route: any; navigation: any }> = ({
   route,
   navigation,
 }) => {
+  const [patientId, setPatientId] = useState<string | undefined>(undefined);
   const { doctorId } = route.params;
-  const doctor: Doctor | undefined = DummyDoctors.find(
-    (doc) => doc.id === doctorId
-  );
+  const helper = useHelper();
+  const api = useApi();
+  useEffect(() => {
+    const getPatientId = async () => {
+      const pId = await AsyncStorage.getItem("decodedPatient");
+      console.log("PiD", JSON.parse(pId).Id);
+
+      setPatientId(JSON.parse(pId).Id);
+    };
+    getPatientId();
+  }, []);
+  const allDoctors = useSelector((state: any) => state.data.doctors);
+
+  const doctor: any = allDoctors.find((doc: any) => doc.id === doctorId);
 
   const [selectedDay, setSelectedDay] = useState<string | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | undefined>(
@@ -28,6 +44,49 @@ const DoctorDetails: React.FC<{ route: any; navigation: any }> = ({
 
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   const times = ["10:00 AM", "11:00 AM", "2:00 PM", "3:00 PM"];
+  const bookAppointment = async () => {
+    if (!patientId) {
+      alert("Patient ID not found. Please log in again.");
+      return;
+    }
+    if (!selectedDay || !selectedTime) {
+      alert("Please select both day and time.");
+      return;
+    }
+
+    // Convert selected day and time to a proper date and time format
+    const date = new Date();
+    const dayIndex = days.indexOf(selectedDay);
+    const today = new Date().getDay();
+
+    // Adjust date to the selected day of the week
+    const deltaDays = (dayIndex + 1 + 7 - today) % 7;
+    date.setDate(date.getDate() + deltaDays);
+
+    const formattedDate = date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+    const formattedTime = selectedTime; // Time is already in HH:MM AM/PM format
+
+    const appointment = {
+      doctorId,
+      patientId,
+      date: formattedDate,
+      time: formattedTime,
+      status: "booked",
+    };
+
+    try {
+      const appointmentId = helper.generateAppointmentId(doctorId, patientId);
+      await addAppointment(appointmentId, appointment);
+      // await api.associateDoctor(doctorId, patientId);
+      alert(
+        `Appointment booked with Dr. ${doctor.firstName} ${doctor.lastName} on ${formattedDate} at ${formattedTime}`
+      );
+      navigation.goBack();
+    } catch (error) {
+      console.error("Error booking appointment:", error);
+      alert("Failed to book appointment. Please try again.");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -37,7 +96,7 @@ const DoctorDetails: React.FC<{ route: any; navigation: any }> = ({
         >{`${doctor.firstName} ${doctor.lastName}`}</Text>
         <Text style={styles.specialization}>{doctor.specialization}</Text>
         <Text style={styles.detail}>
-          Clinic Location: {doctor.clinicLocation}
+          Clinic Location: {doctor.clinicAddress}
         </Text>
         <Text style={styles.detail}>Email: {doctor.email}</Text>
         <Text style={styles.detail}>
@@ -67,17 +126,7 @@ const DoctorDetails: React.FC<{ route: any; navigation: any }> = ({
         </View>
 
         <Button
-          onPress={() => {
-            if (selectedDay && selectedTime) {
-              // Add booking logic here
-              alert(
-                `Appointment booked with Dr. ${doctor.firstName} ${doctor.lastName} on ${selectedDay} at ${selectedTime}`
-              );
-              navigation.goBack();
-            } else {
-              alert("Please select both day and time.");
-            }
-          }}
+          onPress={bookAppointment}
           style={{
             backgroundColor: "#008080",
             borderRadius: 5,

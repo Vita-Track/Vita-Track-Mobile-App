@@ -9,10 +9,17 @@ import { DummyAppointments, DummyDoctors } from "../../data";
 import AppointmentBar from "../../components/UI/AppointmentBar";
 import { Button } from "react-native-paper";
 import DoctorCard from "../../components/UI/DoctorCard";
+import { Link } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAllAppointments } from "../../firebase/database";
 
 const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
+  const [patient, setPatient] = useState<any | undefined>(undefined);
   const [doctorsOfPatients, setDoctorsOfPatients] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const helper = useHelper();
+
   const snackBarContents: Array<SnackBarContents> = [
     {
       icon: "account-multiple",
@@ -32,9 +39,32 @@ const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
     {
       icon: "logout",
       label: "Logout",
-      route: "Logout",
+      route: "Landing",
     },
   ];
+  const firebaseDbOps = getAllAppointments();
+  useEffect(() => {
+    const getAppointments = async () => {
+      const recieveAppointments = await firebaseDbOps;
+      setAppointments(recieveAppointments);
+    };
+    const getPatientId = async () => {
+      const p = await AsyncStorage.getItem("decodedPatient");
+
+      setPatient(JSON.parse(p));
+    };
+    getPatientId();
+    getAppointments();
+    const patientsAppointments = helper.getAppointmentsByPatientId(
+      appointments,
+      patient?.Id
+    );
+
+    setUpcomingAppointments(patientsAppointments);
+    setDoctorsOfPatients(getPatientsDoctors);
+  }, []);
+
+  console.log("Upcoming Appointments", upcomingAppointments);
 
   const quickActions: Array<IQuickActionProps> = [
     {
@@ -58,24 +88,18 @@ const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
       onPress: () => console.log("Help"),
     },
   ];
-  const helper = useHelper();
-  const appointments = DummyAppointments;
+
   const doctors = DummyDoctors;
-  const patientsAppointments = helper.getAppointmentsByPatientId(
-    appointments,
-    "1"
-  );
 
   const getPatientsDoctors = helper.getDoctorsByPatientId(doctors, "1");
 
-  useEffect(() => {
-    setUpcomingAppointments(patientsAppointments);
-    setDoctorsOfPatients(getPatientsDoctors);
-  }, []);
+  useEffect(() => {}, []);
 
   return (
     <SafeAreaView style={styles.patientContainer}>
-      <Text style={styles.patientDashHeading}>Welcome to Your Dashboard</Text>
+      <Text style={styles.patientDashHeading}>
+        Welcome {patient?.FirstName} {patient?.LastName}
+      </Text>
       <ScrollView>
         <View style={styles.mainContent}>
           <View style={{ width: "100%", marginBottom: 10 }}>
@@ -131,6 +155,16 @@ const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
               />
             ))}
           </View>
+          <Button style={styles.viewAllBtn} mode="contained">
+            <Link
+              to="/Landing"
+              onPress={async () => {
+                await AsyncStorage.removeItem("decodedPatient");
+              }}
+            >
+              Logout
+            </Link>
+          </Button>
         </View>
       </ScrollView>
       <View style={styles.footerArea}>
@@ -158,7 +192,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "flex-start",
     padding: 10,
-    margin: 10,
+    marginBottom: 50,
   },
   mainContentHeading: {
     fontSize: 25,

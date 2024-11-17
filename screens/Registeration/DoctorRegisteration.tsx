@@ -3,10 +3,12 @@ import { View, Text, StyleSheet } from "react-native";
 import { TextInput, Button, ProgressBar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useApi from "../../hooks/useApi";
+import LoadingModal from "../../components/UI/LoadingModal";
 
 const DoctorRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState<any>({});
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -19,6 +21,7 @@ const DoctorRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
     experienceYears: "",
     licenseNumber: "",
     clinicLocation: "",
+    password: "",
   });
   const registerHandler = useApi().registerDoctor;
 
@@ -52,8 +55,9 @@ const DoctorRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
         newErrors.phoneNumber = "Phone number should be 10 digits";
       }
 
-      if (!formData.clinicLocation)
+      if (!formData.clinicLocation) {
         newErrors.clinicLocation = "Clinic location is required";
+      }
     } else if (step === 3) {
       if (!formData.specialization)
         newErrors.specialization = "Specialization is required";
@@ -74,37 +78,76 @@ const DoctorRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setLoading(true);
     if (validateForm()) {
-      console.log(formData);
-      // registerHandler(formData)
-      //   .then(() => {
-      //     console.log("Doctor registered successfully");
-      //     navigation.navigate("Doctor Dashboard");
-      //   })
-      //   .catch((error) => {
-      //     console.log(error);
-      //     setErrors({ ...errors, server: "An error occurred" });
-      //     setFormData({
-      //       firstName: "",
-      //       lastName: "",
-      //       gender: "",
-      //       dateOfBirth: "",
-      //       email: "",
-      //       phoneNumber: "",
-      //       specialization: "",
-      //       qualification: "",
-      //       experienceYears: "",
-      //       licenseNumber: "",
-      //       clinicLocation: "",
-      //     });
-      //     setStep(1);
-      //   });
-      navigation.navigate("Doctor Dashboard");
+      const data = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email.toLowerCase(),
+        phone: formData.phoneNumber,
+        clinicAddress: formData.clinicLocation,
+        specialization: formData.specialization,
+        dateOfBirth: new Date(formData.dateOfBirth).toISOString(),
+        experience: formData.experienceYears,
+        licenseNumber: formData.licenseNumber,
+        password: formData.password,
+      };
+      console.log(data);
+      await registerHandler(data)
+        .then((res) => {
+          // console.log(res);
+
+          if (res) {
+            console.log("Doctor registered successfully");
+            navigation.navigate("doctor-login");
+          }
+          setLoading(false);
+          setFormData({
+            firstName: "",
+            lastName: "",
+            gender: "",
+            dateOfBirth: "",
+            email: "",
+            phoneNumber: "",
+            specialization: "",
+            qualification: "",
+            experienceYears: "",
+            licenseNumber: "",
+            clinicLocation: "",
+            password: "",
+          });
+          setStep(1);
+        })
+        .catch((error) => {
+          setErrors({ ...errors, server: "An error occurred" });
+          setFormData({
+            firstName: "",
+            lastName: "",
+            gender: "",
+            dateOfBirth: "",
+            email: "",
+            phoneNumber: "",
+            specialization: "",
+            qualification: "",
+            experienceYears: "",
+            licenseNumber: "",
+            clinicLocation: "",
+            password: "",
+          });
+          setStep(1);
+        });
+      // setLoading(false);
+      // navigation.navigate("Doctor Dashboard");
+    } else {
+      alert("Please fill all the fields");
     }
+    setLoading(false);
   };
 
   const nextStep = () => {
+    console.log(step);
+
     if (validateForm()) setStep((prev) => prev + 1);
   };
 
@@ -177,6 +220,7 @@ const DoctorRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
             {errors.email ? (
               <Text style={styles.error}>{errors.email}</Text>
             ) : null}
+
             <TextInput
               label="Phone Number"
               value={formData.phoneNumber}
@@ -260,6 +304,18 @@ const DoctorRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
             {errors.licenseNumber ? (
               <Text style={styles.error}>{errors.licenseNumber}</Text>
             ) : null}
+            <TextInput
+              label="Password"
+              value={formData.password}
+              onChangeText={(value) => handleInputChange("password", value)}
+              style={styles.input}
+              mode="outlined"
+              secureTextEntry
+              error={!!errors.password}
+            />
+            {errors.password ? (
+              <Text style={styles.error}>{errors.password}</Text>
+            ) : null}
           </>
         );
       default:
@@ -302,6 +358,9 @@ const DoctorRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
         )}
       </View>
       <Text style={styles.stepIndicator}>Step {step} of 3</Text>
+      {loading && (
+        <LoadingModal visible={loading} message="Registering Doctor..." />
+      )}
     </SafeAreaView>
   );
 };

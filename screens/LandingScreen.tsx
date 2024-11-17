@@ -1,7 +1,11 @@
 import LottieView from "lottie-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, StyleSheet, SafeAreaView, Pressable, View } from "react-native";
 import AuthOptionsModal from "../components/UI/AuthOptionsModal";
+
+import { useDispatch } from "react-redux";
+import useApi from "../hooks/useApi";
+import { setDoctors, setPatients } from "../store/data";
 
 const LandingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -11,6 +15,27 @@ const LandingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     setAuthMode(mode);
     setModalVisible(true);
   };
+  const apiHandlers = useApi();
+  const dispatch = useDispatch();
+  const callApiHandlers = async () => {
+    const retrievedDoctors = await apiHandlers
+      .retrieveAllDoctors()
+      .then((res: any) => {
+        return res.data;
+      });
+
+    const retrievedPatients = await apiHandlers
+      .retrieveAllPatients()
+      .then((res: any) => {
+        return res.data;
+      });
+
+    dispatch(setDoctors(retrievedDoctors));
+    dispatch(setPatients(retrievedPatients));
+  };
+  useEffect(() => {
+    callApiHandlers();
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.appTitle}>Vita Track</Text>

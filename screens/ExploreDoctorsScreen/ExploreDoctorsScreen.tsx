@@ -8,13 +8,15 @@ import {
 } from "react-native";
 import DoctorCard from "../../components/UI/DoctorCard";
 import { DummyDoctors } from "../../data";
+import { useSelector } from "react-redux";
 
 const ExploreDoctorsScreen: React.FC<{ navigation: any }> = ({
   navigation,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const filteredDoctors = DummyDoctors.filter(
-    (doctor) =>
+  const allDoctors = useSelector((state: any) => state.data.doctors);
+  const filteredDoctors = allDoctors.filter(
+    (doctor: any) =>
       doctor.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doctor.lastName.toLowerCase().includes(searchQuery.toLowerCase())
   );

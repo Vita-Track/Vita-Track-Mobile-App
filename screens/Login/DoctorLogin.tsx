@@ -3,10 +3,13 @@ import { SafeAreaView, StyleSheet, View } from "react-native";
 import { Button, Text, TextInput } from "react-native-paper";
 import useApi from "../../hooks/useApi";
 import { jwtDecode } from "jwt-decode";
+import LoadingModal from "../../components/UI/LoadingModal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const DoctorLogin: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const loginHandler = useApi().loginDoctor;
   const validateForm = () => {
     const newErrors: any = {};
@@ -16,18 +19,23 @@ const DoctorLogin: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     return Object.keys(newErrors).length === 0;
   };
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!validateForm()) {
       alert("Please fill all the fields");
     } else {
-      loginHandler({
-        email,
+      setLoading(true);
+      const data = {
+        email: email.toLocaleLowerCase(),
         password,
-      }).then((res) => {
-        const decode = jwtDecode(res?.token);
-        console.log(decode);
+      };
+      await loginHandler(data).then(async (res: any) => {
+        setLoading(false);
+        const decode = jwtDecode(res?.data.token);
+        await AsyncStorage.setItem("decodedDoctor", JSON.stringify(decode));
+        console.log(await AsyncStorage.getItem("decodedDoctor"));
         navigation.navigate("Doctor Dashboard");
       });
+      setLoading(false);
     }
   };
 
@@ -62,6 +70,7 @@ const DoctorLogin: React.FC<{ navigation: any }> = ({ navigation }) => {
         >
           Back
         </Button>
+        <LoadingModal visible={loading} message="Logging In.." />
       </View>
     </SafeAreaView>
   );

@@ -9,7 +9,12 @@ import { Button } from "react-native-paper";
 import QuickAction, {
   IQuickActionProps,
 } from "../../components/UI/QuickAction";
+import { getAllAppointments } from "../../firebase/database";
+import { useSelector } from "react-redux";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const DoctorDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [doctor, setDoctor] = useState<any>();
   const [dayPreviewAppointments, setDayPreviewAppointments] = useState<any[]>(
     []
   );
@@ -32,7 +37,7 @@ const DoctorDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
     {
       icon: "logout",
       label: "Logout",
-      route: "Logout",
+      route: "Landing",
     },
   ];
   const quickActions: Array<IQuickActionProps> = [
@@ -53,23 +58,39 @@ const DoctorDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
     },
   ];
   const helper = useHelper();
-  const appointments = DummyAppointments;
-  const patients = DummyPatients;
-  const doctor = DummyDoctors[0];
-  const appointmentsDayPreview = helper
-    .doctorsDayAppointmentsPreview(appointments, doctor.id)
-    .slice(0, 3);
+  const firebaseDbOps = getAllAppointments();
+  const patients = useSelector((state: any) => state.data.patients);
 
   const allTodaysAppointments = helper.doctorsDayAppointmentsPreview(
     appointments,
-    doctor.id
+    "1"
   );
   useEffect(() => {
-    setDayPreviewAppointments(appointmentsDayPreview);
+    const getAppointments = async () => {
+      const recieveAppointments = await firebaseDbOps;
+      setAppointments(recieveAppointments);
+    };
+    const getDoctor = async () => {
+      const d = await AsyncStorage.getItem("decodedDoctor");
+      setDoctor(JSON.parse(d));
+    };
+    getAppointments();
+    getDoctor();
   }, []);
+  console.log("All Appointments of the logged in doc", appointments);
+
+  useEffect(() => {
+    const appointmentsDayPreview = helper
+      .doctorsDayAppointmentsPreview(appointments, doctor?.Id)
+      .slice(0, 3);
+    setDayPreviewAppointments(appointmentsDayPreview);
+  }, [appointments]);
+
   return (
     <SafeAreaView style={styles.doctorContainer}>
-      <Text style={styles.doctorDashHeading}>Welcome, Dr. Adam Levin</Text>
+      <Text style={styles.doctorDashHeading}>
+        Welcome, Dr. {doctor?.FirstName} {doctor?.LastName}
+      </Text>
       <ScrollView>
         <View style={styles.mainContent}>
           <View
@@ -84,7 +105,7 @@ const DoctorDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
             <Text style={styles.mainContentHeading}>
               Today's Appointments at a Glance
             </Text>
-            {dayPreviewAppointments.map((appointment, index) => {
+            {appointments.map((appointment, index) => {
               let patient = helper.findPatientFromId(
                 patients,
                 appointment.patientId
@@ -116,6 +137,9 @@ const DoctorDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
               />
             ))}
           </View>
+          <Button style={styles.ddashboardBtn} mode="contained">
+            <Link to="/Landing">Logout</Link>
+          </Button>
         </View>
       </ScrollView>
       <View style={styles.footerArea}>
@@ -144,6 +168,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     padding: 10,
     margin: 10,
+    marginBottom: 50,
   },
   mainContentHeading: {
     fontSize: 25,

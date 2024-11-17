@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Pressable, SafeAreaView, StyleSheet, View } from "react-native";
 import { Text, TextInput } from "react-native-paper";
+import useApi from "../../hooks/useApi";
+import LoadingModal from "../../components/UI/LoadingModal";
 
 const PatientRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -9,6 +11,7 @@ const PatientRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
     email: "",
     phoneNumber: "",
     dateOfBirth: "",
+    password: "",
   });
 
   const [errors, setErrors] = useState({
@@ -17,7 +20,10 @@ const PatientRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
     email: "",
     phoneNumber: "",
     dateOfBirth: "",
+    password: "",
   });
+
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (name: string, value: string) => {
     setFormData((prevData) => ({
@@ -25,6 +31,7 @@ const PatientRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
       [name]: value,
     }));
   };
+  const registerHandler = useApi().registerPatient;
 
   const validateForm = () => {
     const newErrors: any = {};
@@ -51,10 +58,34 @@ const PatientRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validateForm()) {
-      console.log(formData);
-      navigation.navigate("Patient Dashboard");
+      setLoading(true);
+      const data = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email.toLocaleLowerCase(),
+        phone: formData.phoneNumber,
+        dateOfBirth: formData.dateOfBirth,
+        password: formData.password,
+      };
+      console.log(data);
+
+      await registerHandler(data).then((res: any) => {
+        if (res?.data?.message === "Patient registered successfully") {
+          setLoading(false);
+          navigation.navigate("patient-login");
+        }
+        setLoading(false);
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phoneNumber: "",
+          dateOfBirth: "",
+          password: "",
+        });
+      });
     }
   };
 
@@ -100,6 +131,19 @@ const PatientRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
       ) : null}
 
       <TextInput
+        label="Password"
+        value={formData.password}
+        onChangeText={(value) => handleInputChange("password", value)}
+        style={styles.input}
+        mode="outlined"
+        secureTextEntry
+        error={!!errors.password}
+      />
+      {errors.password ? (
+        <Text style={styles.errorText}>{errors.password}</Text>
+      ) : null}
+
+      <TextInput
         label="Phone Number"
         value={formData.phoneNumber}
         onChangeText={(value) => handleInputChange("phoneNumber", value)}
@@ -137,6 +181,7 @@ const PatientRegistration: React.FC<{ navigation: any }> = ({ navigation }) => {
         >
           <Text style={styles.btnTxt}>Cancel</Text>
         </Pressable>
+        <LoadingModal visible={loading} message="Registering..." />
       </View>
     </SafeAreaView>
   );

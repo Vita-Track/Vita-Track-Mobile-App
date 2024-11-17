@@ -5,7 +5,7 @@ interface Doctor {
   gender: string;
   dateOfBirth: string;
   email: string;
-  phoneNumber: string;
+  phone: string;
   specialization: string;
   qualification: string;
   experienceYears: string;
@@ -19,7 +19,7 @@ interface Patient {
   firstName: string;
   lastName: string;
   email: string;
-  phoneNumber: string;
+  phone: string;
   dateOfBirth: string;
   associatedDoctors?: Doctor[];
 }

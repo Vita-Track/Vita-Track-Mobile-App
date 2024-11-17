@@ -81,6 +81,13 @@ const useHelper = () => {
       );
     });
   };
+  const generateAppointmentId = (doctorId: string, patientId: string) => {
+    const now = new Date();
+    const day = now.getDate().toString().padStart(2, "0"); // Numeric day (e.g., 01)
+    const month = (now.getMonth() + 1).toString().padStart(2, "0"); // Numeric month (e.g., 01)
+    return `AP${day}${month}${doctorId}${patientId}`;
+  };
+
   return {
     doctorsDayAppointmentsPreview,
     getFutureAppointments,
@@ -89,6 +96,7 @@ const useHelper = () => {
     findDoctorFromId,
     getAppointmentsByPatientId,
     getDoctorsByPatientId,
+    generateAppointmentId,
   };
 };
 

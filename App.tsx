@@ -4,7 +4,7 @@ import LandingScreen from "./screens/LandingScreen";
 import DoctorRegistration from "./screens/Registeration/DoctorRegisteration";
 import { DefaultTheme } from "react-native-paper";
 import { Provider as PaperProvider } from "react-native-paper";
-import { Provider as ReduxProvider } from "react-redux";
+import { Provider as ReduxProvider, useDispatch } from "react-redux";
 import store from "./store";
 import DoctorDashboard from "./screens/Dashboard/DoctorDashboard";
 import AppointmentsScreen from "./screens/AppointmentsScreen/AppointmentsScreen";
@@ -47,6 +47,7 @@ export default function App() {
 
     setTestDoctorId();
   }, []);
+
   return (
     <ReduxProvider store={store}>
       <PaperProvider theme={theme}>
