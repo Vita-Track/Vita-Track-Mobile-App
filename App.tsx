@@ -17,6 +17,7 @@ import ExploreDoctorsScreen from "./screens/ExploreDoctorsScreen/ExploreDoctorsS
 import DoctorDetails from "./screens/DoctorDetails/DoctorDetails";
 import DoctorLogin from "./screens/Login/DoctorLogin";
 import PatientLogin from "./screens/Login/PatientLogin";
+import UploadHealthRecord from "./screens/HealthRecord/UploadHealthRecord";
 
 const Stack = createStackNavigator();
 const theme = {
@@ -145,6 +146,14 @@ export default function App() {
               options={{
                 headerBackAccessibilityLabel: "Back",
                 title: "Patients",
+              }}
+            />
+            <Stack.Screen
+              name="upload-health-records"
+              component={UploadHealthRecord}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Upload Health Records",
               }}
             />
           </Stack.Navigator>

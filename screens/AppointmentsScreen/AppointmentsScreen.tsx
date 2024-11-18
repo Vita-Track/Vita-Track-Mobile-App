@@ -1,30 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
 import AppointmentBar from "../../components/UI/AppointmentBar";
-import { DummyAppointments, DummyPatients } from "../../data";
 import useHelper from "../../hooks/useHelper";
+import { useSelector } from "react-redux";
+import { getAllAppointments } from "../../firebase/database";
 
 const AppointmentsScreen = () => {
   const helper = useHelper();
   const today = new Date();
   const tomorrow = new Date(today);
   const dayAfterTomorrow = new Date(today);
-  const patients = DummyPatients;
+  const patients = useSelector((state: any) => state.data.patients);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const firebaseDbOps = getAllAppointments();
+  useEffect(() => {
+    const getAppointments = async () => {
+      const recieveAppointments = await firebaseDbOps;
+      setAppointments(recieveAppointments);
+    };
+    getAppointments();
+  }, []);
 
   tomorrow.setDate(today.getDate() + 1);
   dayAfterTomorrow.setDate(today.getDate() + 2);
 
   // Filter appointments by each day
-  const todayAppointments = helper.getAppointmentsByDate(
-    DummyAppointments,
-    today
-  );
+  const todayAppointments = helper.getAppointmentsByDate(appointments, today);
   const tomorrowAppointments = helper.getAppointmentsByDate(
-    DummyAppointments,
+    appointments,
     tomorrow
   );
   const dayAfterTomorrowAppointments = helper.getAppointmentsByDate(
-    DummyAppointments,
+    appointments,
     dayAfterTomorrow
   );
 

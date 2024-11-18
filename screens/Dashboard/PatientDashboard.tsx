@@ -55,15 +55,18 @@ const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
     };
     getPatientId();
     getAppointments();
+
+    setDoctorsOfPatients(getPatientsDoctors);
+  }, []);
+
+  useEffect(() => {
     const patientsAppointments = helper.getAppointmentsByPatientId(
       appointments,
       patient?.Id
     );
 
     setUpcomingAppointments(patientsAppointments);
-    setDoctorsOfPatients(getPatientsDoctors);
-  }, []);
-
+  }, [appointments.length]);
   console.log("Upcoming Appointments", upcomingAppointments);
 
   const quickActions: Array<IQuickActionProps> = [
@@ -71,6 +74,11 @@ const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
       icon: "account-multiple",
       label: "Discover Doctors",
       onPress: () => navigation.navigate("explore-doctors-screen"),
+    },
+    {
+      icon: "upload",
+      label: "Upload Health Records",
+      onPress: () => navigation.navigate("upload-health-records"),
     },
     {
       icon: "calendar",
@@ -104,18 +112,24 @@ const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.mainContent}>
           <View style={{ width: "100%", marginBottom: 10 }}>
             <Text style={styles.mainContentHeading}>Upcoming Appointments</Text>
-            {upcomingAppointments.slice(0, 3).map((appointment, index) => (
-              <AppointmentBar
-                key={index}
-                doctorName={
-                  helper.findDoctorFromId(doctors, appointment.doctorId)
-                    ?.firstName
-                }
-                showDate={true}
-                time={appointment.time}
-                date={appointment.date}
-              />
-            ))}
+            {upcomingAppointments.length > 0 ? (
+              upcomingAppointments
+                .slice(0, 3)
+                .map((appointment, index) => (
+                  <AppointmentBar
+                    key={index}
+                    doctorName={
+                      helper.findDoctorFromId(doctors, appointment.doctorId)
+                        ?.firstName
+                    }
+                    showDate={true}
+                    time={appointment.time}
+                    date={appointment.date}
+                  />
+                ))
+            ) : (
+              <Text>No upcoming appointments</Text>
+            )}
             <Button style={styles.viewAllBtn} mode="contained">
               <Text onPress={() => navigation.navigate("appointments-screen")}>
                 View all appointments
@@ -155,6 +169,7 @@ const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
               />
             ))}
           </View>
+
           <Button style={styles.viewAllBtn} mode="contained">
             <Link
               to="/Landing"
@@ -192,7 +207,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "flex-start",
     padding: 10,
-    marginBottom: 50,
+    marginBottom: 70,
   },
   mainContentHeading: {
     fontSize: 25,
