@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -11,11 +11,14 @@ import * as DocumentPicker from "expo-document-picker";
 import { Button } from "react-native-paper";
 import * as FileSystem from "expo-file-system";
 import LottieView from "lottie-react-native";
+import { addMedicalRecord } from "../../firebase/database";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import LoadingModal from "../../components/UI/LoadingModal";
 
-const UploadHealthRecord: React.FC = () => {
+const UploadHealthRecord: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
-
-  // Handle file upload from photos
+  const [patient, setPatient] = useState<any | undefined>(undefined);
+  const [loading, setLoading] = useState(false);
   const uploadFromPhotos = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
@@ -31,7 +34,21 @@ const UploadHealthRecord: React.FC = () => {
     }
   };
 
-  // Handle file upload from files
+  useEffect(() => {
+    const getPatientId = async () => {
+      const p = await AsyncStorage.getItem("decodedPatient");
+
+      setPatient(JSON.parse(p));
+    };
+    getPatientId();
+  }, []);
+  const generateRecordId = (patientId: string): string => {
+    const randomInt = Math.floor(1000 + Math.random() * 9000); // Random 4-digit number
+    const randomAlphabet = String.fromCharCode(
+      65 + Math.floor(Math.random() * 26)
+    ); // Random uppercase letter
+    return `HR${patientId}${randomInt}${randomAlphabet}`;
+  };
   const uploadFromFiles = async () => {
     const result = (await DocumentPicker.getDocumentAsync({
       type: [
@@ -71,13 +88,6 @@ const UploadHealthRecord: React.FC = () => {
       }
     }
   };
-
-  // Remove the selected record
-  const removeRecord = () => {
-    setSelectedRecord(null);
-  };
-
-  // Save the uploaded record
   const saveHealthRecord = async () => {
     if (!selectedRecord) {
       alert("Please upload a record before saving.");
@@ -85,13 +95,32 @@ const UploadHealthRecord: React.FC = () => {
     }
 
     try {
-      console.log("Saving record:", selectedRecord);
+      // Generate a unique ID for the record
+      setLoading(true);
+      const recordId = generateRecordId(patient?.Id || "");
+
+      // Create the medical record object
+      const medicalRecord = {
+        id: recordId,
+        fileName: selectedRecord.name,
+        doc: selectedRecord.uri,
+        patientId: patient?.Id,
+        date: new Date().toISOString(),
+      };
+
+      // Save the record to Firebase
+      await addMedicalRecord(recordId, medicalRecord);
+      setLoading(false);
       alert("Health record saved successfully!");
+      navigation.goBack();
       setSelectedRecord(null);
     } catch (error) {
       console.error("Error saving health record:", error);
       alert("Failed to save health record. Please try again.");
     }
+  };
+  const removeRecord = () => {
+    setSelectedRecord(null);
   };
 
   return (
@@ -138,6 +167,7 @@ const UploadHealthRecord: React.FC = () => {
         >
           Save Record
         </Button>
+        <LoadingModal visible={loading} message="Saving.." />
       </View>
     </SafeAreaView>
   );

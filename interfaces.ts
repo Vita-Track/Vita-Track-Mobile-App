@@ -31,3 +31,11 @@ interface Appointment {
   time: string;
   status: string;
 }
+
+interface MedicalRecord {
+  id: string;
+  doc: string;
+  patientId: string;
+  date: string;
+  fileName: string;
+}
