@@ -21,9 +21,9 @@ const PatientDetails: React.FC<{ route: any; navigation: any }> = ({
   const firebaseDbOP = getAllAppointments();
 
   useEffect(() => {
+    const selectedPatient = helper.findPatientFromId(patients, patientId);
+    setPatient(selectedPatient);
     const getAppointments = async () => {
-      const selectedPatient = helper.findPatientFromId(patients, patientId);
-      setPatient(selectedPatient);
       const receivedAppointments = await firebaseDbOP;
       const docsAppointments = helper.getAppointmentsByPatientId(
         receivedAppointments,
@@ -32,7 +32,7 @@ const PatientDetails: React.FC<{ route: any; navigation: any }> = ({
       setPatientAppointments(docsAppointments);
     };
     getAppointments();
-  }, [patientId]);
+  }, [patientId, patients]);
 
   //   console.log("select patients appointments", patientAppointments);
 
@@ -78,7 +78,11 @@ const PatientDetails: React.FC<{ route: any; navigation: any }> = ({
             <Button
               style={styles.healthRecordBtn}
               mode="contained"
-              onPress={() => navigation.goBack()}
+              onPress={() =>
+                navigation.navigate("upload-doctor-record-screen", {
+                  patientId,
+                })
+              }
             >
               Add a health record
             </Button>

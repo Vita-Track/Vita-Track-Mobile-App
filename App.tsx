@@ -24,6 +24,7 @@ import PatientAppointmentsScreen from "./screens/AppointmentsScreen/PatientAppoi
 import PatientDetails from "./screens/PatientDetails/PatientDetails";
 import DoctorsListScreen from "./screens/ListingScreens/DoctorsListScreen";
 import DoctorManage from "./screens/DoctorDetails/DoctorManage";
+import UploadHealthRecordFromDoctor from "./screens/HealthRecord/UploadHealthRecordFromDoctor";
 LogBox.ignoreAllLogs();
 const Stack = createStackNavigator();
 const theme = {
@@ -193,6 +194,14 @@ export default function App() {
             <Stack.Screen
               name="upload-health-records"
               component={UploadHealthRecord}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Upload Health Records",
+              }}
+            />
+            <Stack.Screen
+              name="upload-doctor-record-screen"
+              component={UploadHealthRecordFromDoctor}
               options={{
                 headerBackAccessibilityLabel: "Back",
                 title: "Upload Health Records",

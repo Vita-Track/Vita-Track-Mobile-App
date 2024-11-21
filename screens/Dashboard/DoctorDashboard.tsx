@@ -110,9 +110,7 @@ const DoctorDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
       <ScrollView>
         <View style={styles.mainContent}>
           <View style={styles.section}>
-            <Text style={styles.mainContentHeading}>
-              Today's Appointments at a Glance
-            </Text>
+            <Text style={styles.mainContentHeading}>Upcoming Appointments</Text>
             {dayPreviewAppointments.length > 0 ? (
               dayPreviewAppointments.map((appointment, index) => {
                 let patient = helper.findPatientFromId(
