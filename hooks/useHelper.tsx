@@ -24,38 +24,18 @@ const useHelper = () => {
     return appointmentsTodayForDoctorPreview;
   };
 
-  const getFutureAppointments = (
-    appointments: Appointment[],
-    doctorId: string
-  ) => {
-    const today = new Date().toISOString().split("T")[0];
-    const appointmentsToday = appointments.filter((appointment) => {
-      const formatedDate = new Date(appointment.date)
-        .toISOString()
-        .split("T")[0];
-      //   console.log(formatedDate, today);
-
-      return formatedDate > today;
+  const getFutureAppointments = (appointments: Appointment[], date: Date) => {
+    return appointments.filter((appointment) => {
+      return appointment.date > date.toISOString().split("T")[0];
     });
     // console.log(appointmentsToday);
-
-    const appointmentsTodayForDoctor = appointmentsToday.filter(
-      (appointment) => appointment.doctorId === doctorId
-    );
-    console.log(appointmentsTodayForDoctor);
-    if (appointmentsTodayForDoctor.length === 0) return [];
-
-    const appointmentsTodayForDoctorPreview = appointmentsTodayForDoctor;
-    return appointmentsTodayForDoctorPreview;
   };
 
   const getAppointmentsByDate = (appointments: Appointment[], date: Date) => {
     const formattedDate = date.toISOString().split("T")[0];
+
     return appointments.filter((appointment) => {
-      const appointmentDate = new Date(appointment.date)
-        .toISOString()
-        .split("T")[0];
-      return appointmentDate === formattedDate;
+      return appointment.date === formattedDate;
     });
   };
   const findPatientFromId = (patients: Patient[], patientId: string) => {
@@ -74,6 +54,15 @@ const useHelper = () => {
     );
   };
 
+  const getAppointmentsByDoctorId = (
+    appointments: Appointment[],
+    doctorId: string
+  ) => {
+    return appointments.filter(
+      (appointment) => appointment.doctorId === doctorId
+    );
+  };
+
   const getDoctorsByPatientId = (doctors: Doctor[], patientId: string) => {
     return doctors.filter((doctor) => {
       return doctor.associatedPatients?.find(
@@ -81,11 +70,24 @@ const useHelper = () => {
       );
     });
   };
-  const generateAppointmentId = (doctorId: string, patientId: string) => {
+
+  const getPatientsByDoctorId = (patients: Patient[], doctorId: string) => {
+    return patients.filter((patient) => {
+      return patient.associatedDoctors?.find(
+        (doctor) => doctor.id === doctorId
+      );
+    });
+  };
+  const generateAppointmentId = (
+    doctorId: string,
+    patientId: string,
+    time: string
+  ) => {
+    const randomCode = Math.random().toString(36).substring(2, 6);
     const now = new Date();
     const day = now.getDate().toString().padStart(2, "0"); // Numeric day (e.g., 01)
     const month = (now.getMonth() + 1).toString().padStart(2, "0"); // Numeric month (e.g., 01)
-    return `AP${day}${month}${doctorId}${patientId}`;
+    return `AP${randomCode}${day}${month}${time}${doctorId}${patientId}`;
   };
 
   return {
@@ -96,6 +98,8 @@ const useHelper = () => {
     findDoctorFromId,
     getAppointmentsByPatientId,
     getDoctorsByPatientId,
+    getPatientsByDoctorId,
+    getAppointmentsByDoctorId,
     generateAppointmentId,
   };
 };

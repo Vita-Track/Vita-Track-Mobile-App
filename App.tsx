@@ -7,10 +7,9 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { Provider as ReduxProvider, useDispatch } from "react-redux";
 import store from "./store";
 import DoctorDashboard from "./screens/Dashboard/DoctorDashboard";
-import AppointmentsScreen from "./screens/AppointmentsScreen/AppointmentsScreen";
 import { useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import PatientListScreen from "./screens/PatientsListScreen.tsx/PatientsListScreen";
+import PatientListScreen from "./screens/ListingScreens/PatientsListScreen";
 import PatientRegisteration from "./screens/Registeration/PatientRegisteration";
 import PatientDashboard from "./screens/Dashboard/PatientDashboard";
 import ExploreDoctorsScreen from "./screens/ExploreDoctorsScreen/ExploreDoctorsScreen";
@@ -19,7 +18,13 @@ import DoctorLogin from "./screens/Login/DoctorLogin";
 import PatientLogin from "./screens/Login/PatientLogin";
 import UploadHealthRecord from "./screens/HealthRecord/UploadHealthRecord";
 import PatientMedicalRecordsScreen from "./screens/HealthRecord/PatientMedicalRecordsScreen";
-
+import { LogBox } from "react-native";
+import DoctorAppointmentsScreen from "./screens/AppointmentsScreen/DoctorAppointmentsScreen";
+import PatientAppointmentsScreen from "./screens/AppointmentsScreen/PatientAppointmentsScreen";
+import PatientDetails from "./screens/PatientDetails/PatientDetails";
+import DoctorsListScreen from "./screens/ListingScreens/DoctorsListScreen";
+import DoctorManage from "./screens/DoctorDetails/DoctorManage";
+LogBox.ignoreAllLogs();
 const Stack = createStackNavigator();
 const theme = {
   ...DefaultTheme,
@@ -134,8 +139,16 @@ export default function App() {
             />
 
             <Stack.Screen
-              name="appointments-screen"
-              component={AppointmentsScreen}
+              name="doctor-appointments-screen"
+              component={DoctorAppointmentsScreen}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Appointments",
+              }}
+            />
+            <Stack.Screen
+              name="patient-appts-screen"
+              component={PatientAppointmentsScreen}
               options={{
                 headerBackAccessibilityLabel: "Back",
                 title: "Appointments",
@@ -147,6 +160,34 @@ export default function App() {
               options={{
                 headerBackAccessibilityLabel: "Back",
                 title: "Patients",
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="doctors-list-screen"
+              component={DoctorsListScreen}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Doctors",
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="patient-details-screen"
+              component={PatientDetails}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Patient Details",
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="doctor-manage-screen"
+              component={DoctorManage}
+              options={{
+                headerBackAccessibilityLabel: "Back",
+                title: "Manage Doctor",
+                headerShown: false,
               }}
             />
             <Stack.Screen

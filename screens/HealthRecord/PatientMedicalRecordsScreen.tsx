@@ -53,7 +53,6 @@ const PatientMedicalRecordsScreen: React.FC = () => {
 
   const handleDownload = (record: MedicalRecord) => {
     Alert.alert("Download", `Downloading file: ${record.doc}`);
-    // Implement the file download logic here
   };
 
   return (
@@ -72,9 +71,9 @@ const PatientMedicalRecordsScreen: React.FC = () => {
         )}
         contentContainerStyle={styles.list}
       />
-      <Button style={styles.shareBtn} mode="contained">
+      {/* <Button style={styles.shareBtn} mode="contained">
         Share your health records
-      </Button>
+      </Button> */}
     </View>
   );
 };

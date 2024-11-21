@@ -34,7 +34,9 @@ const LandingScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     dispatch(setPatients(retrievedPatients));
   };
   useEffect(() => {
-    callApiHandlers();
+    setTimeout(() => {
+      callApiHandlers();
+    }, 2000);
   }, []);
   return (
     <SafeAreaView style={styles.container}>

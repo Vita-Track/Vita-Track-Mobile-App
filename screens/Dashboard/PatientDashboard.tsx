@@ -12,9 +12,9 @@ import DoctorCard from "../../components/UI/DoctorCard";
 import { Link } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAllAppointments } from "../../firebase/database";
+import { useSelector } from "react-redux";
 
 const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
   const [patient, setPatient] = useState<any | undefined>(undefined);
   const [doctorsOfPatients, setDoctorsOfPatients] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -44,30 +44,39 @@ const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
   ];
   const firebaseDbOps = getAllAppointments();
   useEffect(() => {
-    const getAppointments = async () => {
-      const recieveAppointments = await firebaseDbOps;
-      setAppointments(recieveAppointments);
-    };
     const getPatientId = async () => {
       const p = await AsyncStorage.getItem("decodedPatient");
-
-      setPatient(JSON.parse(p));
+      if (p) {
+        const patientData = JSON.parse(p);
+        try {
+          // Parse AssociatedDoctors if it's a string
+          if (typeof patientData.AssociatedDoctors === "string") {
+            patientData.AssociatedDoctors = JSON.parse(
+              patientData.AssociatedDoctors
+            );
+          }
+        } catch (error) {
+          console.error("Error parsing AssociatedDoctors", error);
+          patientData.AssociatedDoctors = [];
+        }
+        setPatient(patientData);
+      }
     };
+
     getPatientId();
-    getAppointments();
-
-    setDoctorsOfPatients(getPatientsDoctors);
   }, []);
-
   useEffect(() => {
-    const patientsAppointments = helper.getAppointmentsByPatientId(
-      appointments,
-      patient?.Id
-    );
+    const getAppointments = async () => {
+      const recieveAppointments = await firebaseDbOps;
+      const currentPatientAppointments = helper.getAppointmentsByPatientId(
+        recieveAppointments,
+        patient?.Id
+      );
+      setAppointments(currentPatientAppointments);
+    };
 
-    setUpcomingAppointments(patientsAppointments);
-  }, [appointments.length]);
-  console.log("Upcoming Appointments", upcomingAppointments);
+    getAppointments();
+  }, [patient]);
 
   const quickActions: Array<IQuickActionProps> = [
     {
@@ -97,9 +106,7 @@ const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
     },
   ];
 
-  const doctors = DummyDoctors;
-
-  const getPatientsDoctors = helper.getDoctorsByPatientId(doctors, "1");
+  const doctors = useSelector((state: any) => state.data.doctors);
 
   useEffect(() => {}, []);
 
@@ -112,10 +119,9 @@ const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.mainContent}>
           <View style={{ width: "100%", marginBottom: 10 }}>
             <Text style={styles.mainContentHeading}>Upcoming Appointments</Text>
-            {upcomingAppointments.length > 0 ? (
-              upcomingAppointments
-                .slice(0, 3)
-                .map((appointment, index) => (
+            {appointments.length > 0 ? (
+              appointments.slice(0, 3).map((appointment, index) => {
+                return (
                   <AppointmentBar
                     key={index}
                     doctorName={
@@ -126,34 +132,34 @@ const PatientDashboard: React.FC<{ navigation: any }> = ({ navigation }) => {
                     time={appointment.time}
                     date={appointment.date}
                   />
-                ))
+                );
+              })
             ) : (
               <Text>No upcoming appointments</Text>
             )}
             <Button style={styles.viewAllBtn} mode="contained">
-              <Text onPress={() => navigation.navigate("appointments-screen")}>
-                View all appointments
-              </Text>
+              <Link to="/patient-appts-screen">View all appointments</Link>
             </Button>
           </View>
           <View style={{ width: "100%", marginBottom: 10 }}>
             <Text style={styles.mainContentHeading}>Your Doctors</Text>
-            {doctorsOfPatients.map((doctor, index) => (
-              <DoctorCard
-                key={index}
-                name={`${doctor.firstName} ${doctor.lastName}`}
-                specialization={doctor.specialization}
-                onViewDoctor={() =>
-                  navigation.navigate("doctor-details-screen", {
-                    doctorId: doctor.id,
-                  })
-                }
-              />
-            ))}
+            {patient?.AssociatedDoctors?.map((dId: any, index: any) => {
+              const doctor = helper.findDoctorFromId(doctors, dId);
+              return (
+                <DoctorCard
+                  key={index}
+                  name={`${doctor.firstName} ${doctor.lastName}`}
+                  specialization={doctor.specialization}
+                  onViewDoctor={() =>
+                    navigation.navigate("doctor-manage-screen", {
+                      doctorId: doctor.id,
+                    })
+                  }
+                />
+              );
+            })}
             <Button style={styles.viewAllBtn} mode="contained">
-              <Text
-                onPress={() => navigation.navigate("health-records-screen")}
-              >
+              <Text onPress={() => navigation.navigate("doctors-list-screen")}>
                 View all doctors
               </Text>
             </Button>

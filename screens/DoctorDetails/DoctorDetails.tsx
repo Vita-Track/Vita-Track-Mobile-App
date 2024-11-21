@@ -42,8 +42,25 @@ const DoctorDetails: React.FC<{ route: any; navigation: any }> = ({
     );
   }
 
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-  const times = ["10:00 AM", "11:00 AM", "2:00 PM", "3:00 PM"];
+  const days = [
+    "Today",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+  ];
+  const times = [
+    "9:00 AM",
+    "10:00 AM",
+    "11:00 AM",
+    "12:00 PM",
+    "1:00 PM",
+    "2:00 PM",
+    "3:00 PM",
+    "4:00 PM",
+    "5:00 PM",
+  ];
   const bookAppointment = async () => {
     if (!patientId) {
       alert("Patient ID not found. Please log in again.");
@@ -75,9 +92,15 @@ const DoctorDetails: React.FC<{ route: any; navigation: any }> = ({
     };
 
     try {
-      const appointmentId = helper.generateAppointmentId(doctorId, patientId);
+      const appointmentId = helper.generateAppointmentId(
+        doctorId,
+        patientId,
+        formattedTime
+      );
+      // console.log("Appointment ID", appointmentId);
+
       await addAppointment(appointmentId, appointment);
-      // await api.associateDoctor(doctorId, patientId);
+      await api.associateDoctor(doctorId, patientId);
       alert(
         `Appointment booked with Dr. ${doctor.firstName} ${doctor.lastName} on ${formattedDate} at ${formattedTime}`
       );
@@ -108,7 +131,16 @@ const DoctorDetails: React.FC<{ route: any; navigation: any }> = ({
         <View style={styles.dropdownContainer}>
           <Text style={styles.dropdownLabel}>Select Day</Text>
           <RNPickerSelect
-            onValueChange={(value: any) => setSelectedDay(value)}
+            onValueChange={(value: any) => {
+              if (value === "Today") {
+                let today = new Date().getDay().toLocaleString();
+                setSelectedDay(today);
+                console.log("Today", today);
+
+                return;
+              }
+              setSelectedDay(value);
+            }}
             items={days.map((day) => ({ label: day, value: day }))}
             style={pickerSelectStyles}
             placeholder={{ label: "Select a day", value: undefined }}

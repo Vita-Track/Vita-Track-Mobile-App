@@ -1,58 +1,56 @@
 import React from "react";
-import { SafeAreaView, View, StyleSheet, Text } from "react-native";
-import { IconButton } from "react-native-paper";
+import { StyleSheet, View, Text } from "react-native";
+import { Button } from "react-native-paper";
 
-interface IPatientCardProps {
-  patientName: string;
-  onManagePress: () => void;
+interface PatientCardProps {
+  name?: string;
+  age?: number;
+  onViewPatient?: () => void;
 }
 
-const PatientCard: React.FC<IPatientCardProps> = ({
-  patientName,
-  onManagePress,
+const PatientCard: React.FC<PatientCardProps> = ({
+  name,
+  age,
+  onViewPatient,
 }) => {
   return (
-    <SafeAreaView style={styles.patientCard}>
-      <Text style={styles.patientName}>{patientName}</Text>
-      <IconButton
-        icon="account-cog"
-        size={24}
-        onPress={onManagePress}
-        style={styles.manageButton}
-      />
-    </SafeAreaView>
+    <View style={styles.card}>
+      <Text style={styles.name}>{name}</Text>
+      <Text style={styles.age}>Age: {age}</Text>
+      <Button onPress={onViewPatient} style={styles.patientBtn}>
+        View Patient
+      </Button>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  patientCard: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-    height: 70,
-    backgroundColor: "#008080",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    marginTop: 10,
+  card: {
+    padding: 15,
+    marginVertical: 8,
+    backgroundColor: "#4CAF50", // Change color to differentiate from doctor
+    borderRadius: 8,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
     elevation: 5,
   },
-  patientName: {
-    fontSize: 20,
+  name: {
+    fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
   },
-  manageButton: {
-    backgroundColor: "transparent",
+  age: {
+    fontSize: 16,
+    color: "#fff",
+    marginVertical: 4,
+  },
+  patientBtn: {
+    backgroundColor: "#fff",
+    color: "#4CAF50", // Matching color for the button
+    borderRadius: 5,
+    marginTop: 10,
   },
 });
 

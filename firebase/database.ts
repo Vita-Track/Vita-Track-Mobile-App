@@ -11,6 +11,8 @@ const addAppointment = async (
   appointment: Appointment
 ): Promise<void> => {
   try {
+    console.log(appointmentId);
+
     const appointmentRef = ref(db, `appointments/${appointmentId}`);
     await set(appointmentRef, appointment);
     console.log("Appointment added successfully.");
