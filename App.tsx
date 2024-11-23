@@ -37,8 +37,8 @@ const theme = {
     surface: "#E0FFFF", // Surface color
     text: "#333333", // Text color
     disabled: "#A9A9A9", // Disabled color
-    placeholder: "#B2B2B2", // Placeholder color
-    error: "#FF0000", // Error color
+    placeholder: "#B2B2B2",
+    error: "#FF0000",
   },
 };
 export default function App() {

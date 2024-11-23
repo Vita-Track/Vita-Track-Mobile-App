@@ -5,6 +5,8 @@ import { useSelector } from "react-redux";
 import useHelper from "../../hooks/useHelper";
 import AppointmentBar from "../../components/UI/AppointmentBar";
 import { getAllAppointments } from "../../firebase/database";
+import LoadingModal from "../../components/UI/LoadingModal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const PatientDetails: React.FC<{ route: any; navigation: any }> = ({
   route,
@@ -15,7 +17,7 @@ const PatientDetails: React.FC<{ route: any; navigation: any }> = ({
   const [patient, setPatient] = useState<any>();
 
   const [patientAppointments, setPatientAppointments] = useState<any[]>([]);
-
+  const [loading, setLoading] = useState<boolean>(false);
   const patients = useSelector((state: any) => state.data.patients);
   const helper = useHelper();
   const firebaseDbOP = getAllAppointments();
@@ -23,16 +25,40 @@ const PatientDetails: React.FC<{ route: any; navigation: any }> = ({
   useEffect(() => {
     const selectedPatient = helper.findPatientFromId(patients, patientId);
     setPatient(selectedPatient);
+  }, []);
+
+  useEffect(() => {
+    const getDoctor = async () => {
+      const d = await AsyncStorage.getItem("decodedDoctor");
+      if (d) {
+        const docData = JSON.parse(d);
+        try {
+          // Parse AssociatedDoctors if it's a string
+          if (typeof docData.AssociatedPatients === "string") {
+            docData.AssociatedPatients = JSON.parse(docData.AssociatedPatients);
+          }
+        } catch (error) {
+          console.error("Error parsing AssociatedPatients", error);
+          docData.AssociatedPatients = [];
+        }
+        setDoctor(docData);
+      }
+    };
+
+    getDoctor();
     const getAppointments = async () => {
+      setLoading(true);
       const receivedAppointments = await firebaseDbOP;
       const docsAppointments = helper.getAppointmentsByPatientId(
         receivedAppointments,
         patient?.id
       );
+
+      setLoading(false);
       setPatientAppointments(docsAppointments);
     };
     getAppointments();
-  }, [patientId, patients]);
+  }, [patients.length, patient]);
 
   //   console.log("select patients appointments", patientAppointments);
 
@@ -62,14 +88,20 @@ const PatientDetails: React.FC<{ route: any; navigation: any }> = ({
 
             <Text style={styles.subheading}>Appointments</Text>
             {patientAppointments.length > 0 ? (
-              patientAppointments.map((appointment, index) => (
-                <AppointmentBar
-                  key={index}
-                  time={appointment.time}
-                  date={appointment.date}
-                  showDate={true}
-                />
-              ))
+              patientAppointments
+                .filter((app: any) => {
+                  return app.doctorId === patient.id;
+                })
+                .map((appointment, index) => {
+                  return (
+                    <AppointmentBar
+                      key={index}
+                      time={appointment.time}
+                      date={appointment.date}
+                      showDate={true}
+                    />
+                  );
+                })
             ) : (
               <Text style={styles.noAppointments}>
                 No appointments available.
@@ -98,6 +130,10 @@ const PatientDetails: React.FC<{ route: any; navigation: any }> = ({
           Back to Patients List
         </Button>
       </ScrollView>
+      <LoadingModal
+        visible={loading}
+        message="Fetching patient appointments..."
+      />
     </SafeAreaView>
   );
 };

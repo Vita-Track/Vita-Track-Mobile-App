@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, SafeAreaView, ScrollView } from "react-native";
 import { Button } from "react-native-paper";
 import RNPickerSelect from "react-native-picker-select";
 import { useSelector } from "react-redux";
-import { addAppointment } from "../../firebase/database";
+import { addAppointment, getAllAppointments } from "../../firebase/database";
 import useHelper from "../../hooks/useHelper";
 import useApi from "../../hooks/useApi";
 
@@ -13,6 +13,15 @@ const DoctorDetails: React.FC<{ route: any; navigation: any }> = ({
   navigation,
 }) => {
   const [patientId, setPatientId] = useState<string | undefined>(undefined);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const firebaseDbOps = getAllAppointments();
+  useEffect(() => {
+    const getAppointments = async () => {
+      const receivedAppointments = await firebaseDbOps;
+      setAppointments(receivedAppointments);
+    };
+    getAppointments();
+  }, []);
   const { doctorId } = route.params;
   const helper = useHelper();
   const api = useApi();
@@ -76,13 +85,24 @@ const DoctorDetails: React.FC<{ route: any; navigation: any }> = ({
     const dayIndex = days.indexOf(selectedDay);
     const today = new Date().getDay();
 
-    // Adjust date to the selected day of the week
     const deltaDays = (dayIndex + 1 + 7 - today) % 7;
     date.setDate(date.getDate() + deltaDays);
 
-    const formattedDate = date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-    const formattedTime = selectedTime; // Time is already in HH:MM AM/PM format
+    const formattedDate = date.toISOString().split("T")[0];
+    const formattedTime = selectedTime;
+    const hasConflict = helper.conflictChecker(
+      appointments,
+      formattedDate,
+      formattedTime,
+      doctorId
+    );
 
+    if (hasConflict) {
+      alert(
+        `Conflict detected: Dr. ${doctor.firstName} ${doctor.lastName} already has an appointment on ${formattedDate} at ${formattedTime}.`
+      );
+      return;
+    }
     const appointment = {
       doctorId,
       patientId,

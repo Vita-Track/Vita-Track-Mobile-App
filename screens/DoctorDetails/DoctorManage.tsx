@@ -5,38 +5,48 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import useHelper from "../../hooks/useHelper";
 import { useSelector } from "react-redux";
 import { getAllAppointments } from "../../firebase/database";
+import LoadingModal from "../../components/UI/LoadingModal";
 
 const DoctorManage: React.FC<{ route: any; navigation: any }> = ({
   route,
   navigation,
 }) => {
   const { doctorId } = route.params;
-  console.log("Doctor ID", doctorId);
 
   const [doctor, setDoctor] = useState<any>(null);
   const [patient, setPatient] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [appointments, setAppointments] = useState<any[]>([]);
   const doctors = useSelector((state: any) => state.data.doctors);
   const helper = useHelper();
   const firebaseDbOP = getAllAppointments();
   useEffect(() => {
-    const getAppointments = async () => {
+    const patientSet = async () => {
       const patient = await AsyncStorage.getItem("decodedPatient");
       setPatient(JSON.parse(patient));
       const selectedDoctor = helper.findDoctorFromId(doctors, doctorId);
       setDoctor(selectedDoctor);
+    };
+
+    patientSet();
+  }, []);
+
+  useEffect(() => {
+    const getAppointments = async () => {
+      setLoading(true);
       const receivedAppointments = await firebaseDbOP;
       const docsAppointments = helper.getAppointmentsByDoctorId(
         receivedAppointments,
         doctorId
       );
+      setLoading(false);
       console.log("Doctor Appointments", docsAppointments);
 
       setAppointments(docsAppointments);
     };
 
     getAppointments();
-  }, [doctorId]);
+  }, [doctors.length]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -70,6 +80,10 @@ const DoctorManage: React.FC<{ route: any; navigation: any }> = ({
           >
             Back to Doctors List
           </Button>
+          <LoadingModal
+            visible={loading}
+            message="Trying to fetch existing appointments with the patient..."
+          />
         </ScrollView>
       ) : (
         <Text>Loading doctor details...</Text>

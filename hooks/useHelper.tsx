@@ -90,6 +90,25 @@ const useHelper = () => {
     return `AP${randomCode}${day}${month}${time}${doctorId}${patientId}`;
   };
 
+  const conflictChecker = (
+    appointments: Appointment[],
+    date: string,
+    time: string,
+    doctorId: string
+  ): boolean => {
+    const formattedDate = new Date(date).toISOString().split("T")[0];
+
+    // Check for conflicting appointment
+    const hasConflict = appointments.some(
+      (appointment) =>
+        appointment.doctorId === doctorId &&
+        appointment.date === formattedDate &&
+        appointment.time === time
+    );
+
+    return hasConflict;
+  };
+
   return {
     doctorsDayAppointmentsPreview,
     getFutureAppointments,
@@ -101,6 +120,7 @@ const useHelper = () => {
     getPatientsByDoctorId,
     getAppointmentsByDoctorId,
     generateAppointmentId,
+    conflictChecker,
   };
 };
 
